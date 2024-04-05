@@ -1,26 +1,61 @@
 import { useState } from "react";
 
+export default function Game() {
+  const [xIsNext, setXIsNext] = useState(true);
+  const [moves, setMoveHistory] = useState([Array(9).fill(null)]);
+  const currentBoardLayout = moves[moves.length - 1];
+
+  // console.log(moves);
+
+  function handlePlay(squaresCopy) {
+    setMoveHistory([...moves, squaresCopy]); // copies the arr and adds everything that is in squaresCopy
+    setXIsNext(!xIsNext);
+  }
+
+  function jumpTo(nextMove) {
+
+  }
+
+  const plays = moves.map((squares, indexOfPlay) => { //.map works like enumerate in Python, where we get the element and the index -- squares in this case is the element and index is the index of that particular element
+    let description;
+    
+    if (indexOfPlay > 0)  {
+      description = `Jump to move #${indexOfPlay}`
+    } else {
+      description = `This is the first play`
+    }
+
+    return (
+      <li>
+        <button onClick={() => jumpTo(indexOfPlay)}>{description}</button>
+      </li>
+    );
+
+  });
+
+
+  return (
+    <>
+    <div className="game">
+      <div className="game-board">
+        <Board xIsNext={xIsNext} squares={currentBoardLayout} onPlay={handlePlay}/>
+      </div>
+      <div className="game-info">
+        <ol>{plays}</ol>
+      </div>
+    </div>
+
+    </>
+  );
+}
+
 function Square({ value, onSquareClick }) {
   return (
     <button className="square" onClick={onSquareClick}>{value}</button>
   );
 }
 
-export default function Board() {
-  const [xIsNext, setXIsNext] = useState(true);
-  const [squares, setSquares] = useState(Array(9).fill(null));
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = `Winner is ${winner}`
-  } else {
-    status = `Next player is ${xIsNext ? 'X':'O'}`
-    //this is a concise way to write an if-else statement
-    //it follows the format
-    //condition ? valueIfTrue : valueIfFalse
-
-  }
-
+function Board({ xIsNext, squares, onPlay }) {
   function handleClick(i) {
     const squaresCopy = squares.slice(); //.slice() creates a (shallow) copy of the arr
 
@@ -34,11 +69,20 @@ export default function Board() {
       squaresCopy[i] = 'O';
     }
 
-    setSquares(squaresCopy);
-    setXIsNext(!xIsNext);
+    onPlay(squaresCopy);
   }
+  
+  const winner = calculateWinner(squares);
+  let status;
+  if (winner) {
+    status = `Winner is ${winner}`
+  } else {
+    status = `Next player is ${xIsNext ? 'X':'O'}`
+    //this is a concise way to write an if-else statement
+    //it follows the format
+    //condition ? valueIfTrue : valueIfFalse
 
-  // console.log(squares);
+  }
 
   return (
     <>
@@ -63,7 +107,6 @@ export default function Board() {
     </>
   );
 }
-
 
 function calculateWinner(squares){
   const lines = [
