@@ -1,22 +1,26 @@
 import { useState } from "react";
 
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(true);
   const [moves, setMoveHistory] = useState([Array(9).fill(null)]);
-  const currentBoardLayout = moves[moves.length - 1];
+  const [currentMove, setCurrentMove] = useState(0);
+  const xIsNext = currentMove % 2 === 0;
+  const currentBoardLayout = moves[currentMove];
 
   // console.log(moves);
 
   function handlePlay(squaresCopy) {
-    setMoveHistory([...moves, squaresCopy]); // copies the arr and adds everything that is in squaresCopy
-    setXIsNext(!xIsNext);
+    const nextHistory = [...moves.slice(0, currentMove + 1), squaresCopy]
+    setMoveHistory(nextHistory); // copies the arr and adds everything that is in squaresCopy
+    setCurrentMove(nextHistory.length - 1);
   }
 
   function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
 
   }
 
   const plays = moves.map((squares, indexOfPlay) => { //.map works like enumerate in Python, where we get the element and the index -- squares in this case is the element and index is the index of that particular element
+    // on each rerender React will only update the DOM with new elements (underlying mechanics know which elements have already been rendered)
     let description;
     
     if (indexOfPlay > 0)  {
@@ -25,8 +29,10 @@ export default function Game() {
       description = `This is the first play`
     }
 
+    //react will throw a key error if a key is not assigned to the list; keys are useful for changes within a list, ex. insertion, deletion, reordering
+
     return (
-      <li>
+      <li key={indexOfPlay}> 
         <button onClick={() => jumpTo(indexOfPlay)}>{description}</button>
       </li>
     );
